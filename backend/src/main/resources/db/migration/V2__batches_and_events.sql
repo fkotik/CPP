@@ -6,9 +6,9 @@
 
 -- ---------- Партия ----------
 CREATE TABLE batch (
-    batch_id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id               INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     batch_number           VARCHAR(20)  NOT NULL UNIQUE,
-    house_id               BIGINT       NOT NULL REFERENCES poultry_house (house_id),
+    house_id               INTEGER       NOT NULL REFERENCES poultry_house (house_id),
     planting_date          DATE         NOT NULL,
     initial_count          INTEGER      NOT NULL CHECK (initial_count > 0),
     source_supplier        VARCHAR(200) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE batch (
     planned_slaughter_date DATE         NOT NULL,
     status                 VARCHAR(20)  NOT NULL DEFAULT 'PLANTING'
         CHECK (status IN ('PLANTING','GROWING','WEIGHING','SLAUGHTER','CLOSED')),
-    created_by             BIGINT       NOT NULL REFERENCES app_user (user_id),
+    created_by             INTEGER       NOT NULL REFERENCES app_user (user_id),
     created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     closed_at              TIMESTAMPTZ,
     CONSTRAINT chk_batch_dates CHECK (planned_slaughter_date >= planting_date)
@@ -29,8 +29,8 @@ CREATE INDEX idx_batch_planting ON batch (planting_date);
 
 -- ---------- Показатели от Ситуационного центра (только чтение в паспорте) ----------
 CREATE TABLE indicator (
-    indicator_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    batch_id       BIGINT        NOT NULL REFERENCES batch (batch_id),
+    indicator_id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id       INTEGER        NOT NULL REFERENCES batch (batch_id),
     indicator_type VARCHAR(50)   NOT NULL,   -- TEMPERATURE, HUMIDITY, FEED_CONSUMPTION ...
     value          NUMERIC(14,4) NOT NULL,
     unit           VARCHAR(20)   NOT NULL,
@@ -43,8 +43,8 @@ CREATE INDEX idx_indicator_batch_type ON indicator (batch_id, indicator_type);
 
 -- ---------- Инциденты от Ситуационного центра ----------
 CREATE TABLE incident (
-    incident_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    batch_id      BIGINT       NOT NULL REFERENCES batch (batch_id),
+    incident_id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id      INTEGER       NOT NULL REFERENCES batch (batch_id),
     incident_type VARCHAR(100) NOT NULL,
     description   TEXT,
     occurred_at   TIMESTAMPTZ  NOT NULL,
@@ -58,15 +58,15 @@ CREATE INDEX idx_incident_batch_time ON incident (batch_id, occurred_at);
 
 -- ---------- Ветеринарные обработки (ручной ввод) ----------
 CREATE TABLE vet_treatment (
-    treatment_id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    batch_id            BIGINT       NOT NULL REFERENCES batch (batch_id),
+    treatment_id        INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id            INTEGER       NOT NULL REFERENCES batch (batch_id),
     treatment_date      DATE         NOT NULL,
     treatment_type      VARCHAR(20)  NOT NULL
         CHECK (treatment_type IN ('VACCINATION','TREATMENT','EXAMINATION','DIAGNOSTICS')),
     drug_name           VARCHAR(200),
     dosage              VARCHAR(100),
     method              VARCHAR(100),
-    responsible_user_id BIGINT       NOT NULL REFERENCES app_user (user_id),
+    responsible_user_id INTEGER       NOT NULL REFERENCES app_user (user_id),
     notes               TEXT,
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     -- Для вакцинации и лечения препарат и дозировка обязательны (защита на уровне БД)
@@ -80,8 +80,8 @@ CREATE INDEX idx_vet_batch_date ON vet_treatment (batch_id, treatment_date);
 
 -- ---------- Контрольные взвешивания ----------
 CREATE TABLE control_weighing (
-    weighing_id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    batch_id            BIGINT       NOT NULL REFERENCES batch (batch_id),
+    weighing_id         INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id            INTEGER       NOT NULL REFERENCES batch (batch_id),
     weighing_date       DATE         NOT NULL,
     age_days            INTEGER      NOT NULL CHECK (age_days >= 0),
     sample_size         INTEGER      NOT NULL CHECK (sample_size > 0),
@@ -89,15 +89,15 @@ CREATE TABLE control_weighing (
     planned_avg_weight  NUMERIC(8,2) NOT NULL,                                -- г
     deviation_absolute  NUMERIC(8,2) NOT NULL,                                -- г
     deviation_percent   NUMERIC(6,2) NOT NULL,                                -- %
-    responsible_user_id BIGINT       NOT NULL REFERENCES app_user (user_id),
+    responsible_user_id INTEGER       NOT NULL REFERENCES app_user (user_id),
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_weighing_batch_date ON control_weighing (batch_id, weighing_date);
 
 -- ---------- Результат убоя (одна запись на партию) ----------
 CREATE TABLE slaughter_result (
-    slaughter_result_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    batch_id               BIGINT        NOT NULL UNIQUE REFERENCES batch (batch_id),
+    slaughter_result_id    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id               INTEGER        NOT NULL UNIQUE REFERENCES batch (batch_id),
     slaughter_date         DATE          NOT NULL,
     actual_count           INTEGER       NOT NULL CHECK (actual_count >= 0),
     final_live_weight      NUMERIC(12,2) NOT NULL CHECK (final_live_weight > 0),      -- кг
@@ -107,7 +107,7 @@ CREATE TABLE slaughter_result (
     quality_result         VARCHAR(20)   NOT NULL
         CHECK (quality_result IN ('COMPLIANT','WITH_REMARKS','REJECT')),
     defect_count           INTEGER CHECK (defect_count >= 0),   -- необязательное
-    responsible_user_id    BIGINT        NOT NULL REFERENCES app_user (user_id),
+    responsible_user_id    INTEGER        NOT NULL REFERENCES app_user (user_id),
     created_at             TIMESTAMPTZ   NOT NULL DEFAULT now(),
     CONSTRAINT chk_slaughter_output CHECK (product_output_weight <= final_live_weight)
 );
@@ -116,7 +116,7 @@ CREATE TABLE slaughter_result (
 -- Хранятся ОРИЕНТИРОВОЧНЫЕ точки раз в неделю; между ними сервис интерполирует
 -- линейно. Это учебные значения, не официальные таблицы производителей.
 CREATE TABLE growth_norm (
-    growth_norm_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    growth_norm_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     cross_breed    VARCHAR(50)  NOT NULL
         CHECK (cross_breed IN ('Ross 308', 'Cobb 500', 'Hubbard F15')),
     age_days       INTEGER      NOT NULL CHECK (age_days >= 0),

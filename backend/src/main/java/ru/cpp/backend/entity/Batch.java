@@ -13,7 +13,7 @@ public class Batch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "batch_id")
-    private Long id;
+    private Integer id;
 
     @Column(name = "batch_number", nullable = false, unique = true, length = 20)
     private String batchNumber;
@@ -67,7 +67,7 @@ public class Batch {
 
     // ---- getters / setters (JPA требует конструктор без аргументов - он есть неявно) ----
 
-    public Long getId() { return id; }
+    public Integer getId() { return id; }
 
     public String getBatchNumber() { return batchNumber; }
     public void setBatchNumber(String batchNumber) { this.batchNumber = batchNumber; }
