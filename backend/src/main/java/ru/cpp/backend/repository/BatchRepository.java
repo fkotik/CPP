@@ -12,7 +12,7 @@ import ru.cpp.backend.entity.Batch;
 import java.util.List;
 
 // JpaSpecificationExecutor добавляет findAll(Specification, Sort): поиск с динамическими условиями
-public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecificationExecutor<Batch> {
+public interface BatchRepository extends JpaRepository<Batch, Integer>, JpaSpecificationExecutor<Batch> {
 
     boolean existsByBatchNumber(String batchNumber);
 

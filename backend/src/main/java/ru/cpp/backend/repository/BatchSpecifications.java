@@ -19,7 +19,7 @@ public final class BatchSpecifications {
     private BatchSpecifications() {
     }
 
-    public static Specification<Batch> filter(String search, Long houseId, BatchStatus status,
+    public static Specification<Batch> filter(String search, Integer houseId, BatchStatus status,
                                               LocalDate plantedFrom, LocalDate plantedTo) {
         // Specification - функция (root, query, cb) -> Predicate.
         // root = таблица batch, cb = "строитель" условий

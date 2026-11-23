@@ -123,7 +123,7 @@ public class BatchService {
     // ------------------------------------------------------------------ чтение
 
     @Transactional(readOnly = true)
-    public List<BatchListItemDto> list(String search, Long houseId, BatchStatus status,
+    public List<BatchListItemDto> list(String search, Integer houseId, BatchStatus status,
                                        LocalDate plantedFrom, LocalDate plantedTo) {
         Sort sort = Sort.by(Sort.Order.desc("plantingDate"), Sort.Order.desc("id"));
         return batchRepository
@@ -134,14 +134,14 @@ public class BatchService {
     }
 
     @Transactional(readOnly = true)
-    public BatchDetailDto get(Long id, String login) {
+    public BatchDetailDto get(Integer id, String login) {
         return toDetail(findBatch(id), currentUser(login));
     }
 
     // ------------------------------------------------------------------ смена статуса
 
     @Transactional
-    public BatchDetailDto advance(Long id, String login) {
+    public BatchDetailDto advance(Integer id, String login) {
         AppUser user = currentUser(login);
         Batch batch = findBatch(id);
 
@@ -170,7 +170,7 @@ public class BatchService {
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Пользователь не найден"));
     }
 
-    private Batch findBatch(Long id) {
+    private Batch findBatch(Integer id) {
         return batchRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Партия не найдена"));
     }

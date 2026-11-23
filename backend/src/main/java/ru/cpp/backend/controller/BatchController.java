@@ -21,7 +21,7 @@ import java.util.List;
 public class BatchController {
 
     // Кто может смотреть партии. Администратор НЕ в списке: он только управляет пользователями.
-    private static final String VIEW = "hasAnyRole('TECHNOLOGIST','VET','QC','MANAGER')";
+    public static final String VIEW = "hasAnyRole('TECHNOLOGIST','VET','QC','MANAGER')";
 
     private final BatchService batchService;
 
@@ -42,7 +42,7 @@ public class BatchController {
     @PreAuthorize(VIEW)
     public List<BatchListItemDto> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Long houseId,
+            @RequestParam(required = false) Integer houseId,
             @RequestParam(required = false) BatchStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plantedFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plantedTo) {
@@ -51,7 +51,7 @@ public class BatchController {
 
     @GetMapping("/{id}")
     @PreAuthorize(VIEW)
-    public BatchDetailDto get(@PathVariable Long id, Authentication auth) {
+    public BatchDetailDto get(@PathVariable Integer id, Authentication auth) {
         // Authentication Spring подставляет сам: это "кто сейчас вошёл". getName() = логин.
         return batchService.get(id, auth.getName());
     }
@@ -66,7 +66,7 @@ public class BatchController {
     // Кнопка "Перевести в ...". Точное правило "кто из какого статуса" - внутри сервиса.
     @PostMapping("/{id}/advance")
     @PreAuthorize("hasAnyRole('TECHNOLOGIST','QC')")
-    public BatchDetailDto advance(@PathVariable Long id, Authentication auth) {
+    public BatchDetailDto advance(@PathVariable Integer id, Authentication auth) {
         return batchService.advance(id, auth.getName());
     }
 }
